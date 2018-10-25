@@ -16,8 +16,6 @@
     "test": "jest",
     "build:declarations": "tsc --build tsconfig.json",
     "build": "concurrently 'yarn build:declarations' 'yarn build:code'",
-    "watch1": "concurrently 'yarn build:declarations --watch' 'yarn build:code --watch'",
-    "watch2": "concurrently 'yarn build:declarations --watch' 'yarn build:code --watch'",
     "watch": "concurrently 'yarn build:declarations --watch' 'yarn build:code --watch'"
   },
   "publishConfig": {
