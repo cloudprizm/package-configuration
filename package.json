@@ -35,6 +35,13 @@
       "node"
     ]
   },
+  "dependencies": {
+    "cosmiconfig": "^5.0.6",
+    "@types/cosmiconfig": "^5.0.3",
+    "ramda": "^0.25.0",
+    "fp-ts": "^1.10.0",
+    "semver": "^5.6.0"
+  },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
     "@babel/core": "^7.1.2",

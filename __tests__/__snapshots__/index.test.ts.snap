@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`get deps versions 1`] = `
+Object {
+  "@babel/cli": "7.1.2",
+  "@babel/core": "7.1.2",
+  "@hungry/babel-preset-cli": "0.1.1",
+  "@types/cosmiconfig": "5.0.3",
+  "babel-core": "7.0.0",
+  "babel-jest": "23.6.0",
+  "concurrently": "4.0.1",
+  "cosmiconfig": "5.0.6",
+  "fp-ts": "1.10.0",
+  "jest": "23.6.0",
+  "ramda": "0.25.0",
+  "semver": "5.6.0",
+  "typescript": "3.1.3",
+}
+`;
