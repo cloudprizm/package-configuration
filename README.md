@@ -1,4 +1,4 @@
-# `@hungry/package-configuration'
+# `@hungry/package-configuration`
 Super simple set of helpers for handling `package.json` in `typescript`. 
 More `helpers` is coming.
 
