@@ -2,7 +2,7 @@
 // a) http://wiki.commonjs.org/wiki/Packages/1.0
 // b) https://docs.npmjs.com/files/package.json 
 
-export type HashMap<K = string> = {
+export interface HashMap<K = string> {
   [key: string]: string | K
 }
 
@@ -40,7 +40,7 @@ interface Scripts {
 }
 
 interface Repository {
-  type: "git" | string
+  type: 'git' | string
   url: string
   path: string
 }
@@ -50,20 +50,20 @@ interface Bugs {
   email: string
 }
 
-type License = {
+interface License {
   type: string
   url: string
 }
 
 type Licenses = License[]
 
-type Author = {
+interface Author {
   name: string
   email?: string
   url?: string
 }
 
-export type PackageJSON = {
+export interface PackageJSON {
   name: string
   url: string
   email: string
@@ -96,9 +96,9 @@ export type PackageJSON = {
   repositories: Repository[]
   scripts: Scripts
 
-  cpu: (string | 'x64' | 'ia32' | 'arm' | 'mips')[]
-  os: (string | 'linux' | 'os' | 'win' | 'darwin')[]
-  engines: (string | 'v8' | 'ejs' | 'node' | 'rhino')[] | HashMap
+  cpu: Array<string | 'x64' | 'ia32' | 'arm' | 'mips'>
+  os: Array<string | 'linux' | 'os' | 'win' | 'darwin'>
+  engines: Array<string | 'v8' | 'ejs' | 'node' | 'rhino'> | HashMap
 
   publishConfig: {
     tag: string

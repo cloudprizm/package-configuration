@@ -11,6 +11,8 @@ yarn add @hungry/package-configuration
 ```typescript
 // get comiconfig configuration
 export const getModuleConfig
+// i.e.
+const getPackageConfig = getModuleConfigSync<{ theme: string, externals: string }>('webpack')
 
 // loading package.json file
 export const getLocalPackageJson
@@ -22,6 +24,3 @@ export const coerceVersions
 // i.e. useful when resolving cdn dependencies from `https://unpkg.com`
 export const persistVersionsFromPackage
 ```
-
-### Why
-There is not `typescript` definition for `package.json` file.

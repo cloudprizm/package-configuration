@@ -16,7 +16,9 @@
     "test": "jest",
     "build:declarations": "tsc --build tsconfig.json",
     "build": "concurrently 'yarn build:declarations' 'yarn build:code'",
-    "watch": "concurrently 'yarn build:declarations --watch' 'yarn build:code --watch'"
+    "watch": "concurrently 'yarn build:declarations --watch' 'yarn build:code --watch'",
+    "docs": "typedoc --out docs src",
+    "gh-pages": "rm -rf docs && yarn docs && gh-pages -d docs"
   },
   "publishConfig": {
     "access": "public"
@@ -35,14 +37,20 @@
       "node"
     ]
   },
+  "engines": {
+    "node": ">=8.6.0"
+  },
   "dependencies": {
     "cosmiconfig": "^5.0.6",
     "@types/cosmiconfig": "^5.0.3",
     "ramda": "^0.25.0",
     "fp-ts": "^1.10.0",
-    "semver": "^5.6.0"
+    "semver": "^5.6.0",
+    "utility-types": "^2.1.0"
   },
   "devDependencies": {
+    "typedoc": "^0.13.0",
+    "gh-pages": "^2.0.1",
     "@babel/cli": "^7.1.2",
     "@babel/core": "^7.1.2",
     "@hungry/babel-preset-cli": "^0.1.1",
