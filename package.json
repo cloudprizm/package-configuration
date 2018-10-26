@@ -17,7 +17,7 @@
     "build:declarations": "tsc --build tsconfig.json",
     "build": "concurrently 'yarn build:declarations' 'yarn build:code'",
     "watch": "concurrently 'yarn build:declarations --watch' 'yarn build:code --watch'",
-    "docs": "typedoc --out docs ./src/** --mode file --target ES6 --theme minimal"
+    "docs": "typedoc --out docs ./src/**"
   },
   "publishConfig": {
     "access": "public"
