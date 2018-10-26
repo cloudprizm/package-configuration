@@ -1,7 +1,7 @@
 import cosmiconfig, { Config as Cosmiconfig, CosmiconfigResult } from 'cosmiconfig'
 import { Overwrite, $Keys } from 'utility-types'
 
-import { HashMap, PackageJSON } from './types'
+import { HashMap, HashMapWithOptions, PackageJSON } from './types'
 import { defaultTo, fromPairs, reduce, merge, map, toPairs, pipe, pick } from 'ramda'
 import { valid, coerce } from 'semver'
 
@@ -10,22 +10,40 @@ import { IO } from 'fp-ts/lib/IO'
 import { promises as fs } from 'fs'
 import { resolve } from 'path'
 
-export type ExtendableCosmiconfig<K = Cosmiconfig> = Overwrite<Exclude<CosmiconfigResult, null>, { config: K }>
+export type ExtendableCosmiconfig<K = Cosmiconfig> =
+  Overwrite<Exclude<CosmiconfigResult, null>, { config: K }>
+
+/**
+ * get comiconfig configuration
+ * @param module 
+ * @param searchFrom 
+ */
 export const getModuleConfigSync = <K>(pkgPart: string, searchFrom: string = '') =>
   cosmiconfig(pkgPart).searchSync(searchFrom) as ExtendableCosmiconfig<K>
 
+/**
+ * get comiconfig configuration
+ * @param module 
+ * @param searchFrom 
+ */
 export const getModuleConfig = (module: string, searchFrom: string = '') =>
   cosmiconfig(module).search(searchFrom)
 
-export const getLocalPackageJson = (packageJSON: string = './package.json'): PackageJSON =>
-  require(packageJSON)
+/**
+ * loading package.json file
+ * @param location 
+ */
+export const getLocalPackageJson = (location: string = './package.json'): PackageJSON =>
+  require(location)
 
-export type PackageJSONDeps = Pick<PackageJSON, 'peerDependencies' | 'devDependencies' | 'dependencies'>
-type Deps = HashMap<HashMap<string>>
-type toDependenciesPairs = ReadonlyArray<[string, Deps]>
+export type PackageJSONDepsKeys = 'peerDependencies' | 'devDependencies' | 'dependencies'
+export type PackageJSONDeps = Pick<PackageJSON, PackageJSONDepsKeys>
+export type PackageDependency = HashMap
+export type Deps = HashMapWithOptions<PackageJSONDepsKeys, PackageDependency>
+type toDependenciesPairs = ReadonlyArray<[string, PackageDependency]>
 
 export const getDependencyVersions =
-  pipe<PackageJSON, PackageJSONDeps, toDependenciesPairs, ReadonlyArray<Deps>, HashMap>(
+  pipe<PackageJSON, PackageJSONDeps, toDependenciesPairs, PackageDependency[], PackageDependency>(
     pick(['peerDependencies', 'devDependencies', 'dependencies']),
     toPairs,
     map(([_, deps]) => deps),
@@ -40,8 +58,11 @@ const resolveSemVer = pipe(
   valid,
 )
 
+/**
+ * Converting list of package dependencies to the latest
+ */
 export const coerceVersions =
-  pipe<HashMap, ReadonlyArray<[string, string]>, DependencyT[], HashMap>(
+  pipe<PackageDependency, ReadonlyArray<[string, string]>, DependencyT[], HashMap>(
     toPairs,
     map(([dep, version]) => [dep, resolveSemVer(version)] as DependencyT),
     fromPairs,
@@ -62,14 +83,16 @@ export const resolvePath = (input: VersionPersisterConfig, prop: $Keys<VersionPe
     ? resolve(input.cwd, input.packagePath)
     : input.packagePath
 
-export const resolvePaths = ask<Config, IOResult>()
-  .map(cfg => ({
-    packagePath: resolvePath(cfg, 'packagePath'),
-    destinationPath: resolvePath(cfg, 'destinationPath')
-  }))
+export const resolveConfigPaths =
+  ask<Config, IOResult>()
+    .map(cfg => ({
+      ...cfg,
+      packagePath: resolvePath(cfg, 'packagePath'),
+      destinationPath: resolvePath(cfg, 'destinationPath')
+    }))
 
 export const loadPackageFile = () =>
-  resolvePaths
+  resolveConfigPaths
     .chain(d => fromIO(new IO(() => getLocalPackageJson(d.packagePath))))
 
 export const saveFile = (content: Content) =>
@@ -89,6 +112,10 @@ export const getDepsVersionsFromPackage = readerTaskEither
   .map(getDependencyVersions)
   .map(coerceVersions)
 
+/**
+ * Saving all dependencies to file from package.json as a map and converting semver to most recent one,
+ * i.e. useful when resolving cdn dependencies from `https://unpkg.com`
+ */
 export const persistVersionsFromPackage = getDepsVersionsFromPackage
   .map(d => JSON.stringify(d))
   .chain(saveFile)

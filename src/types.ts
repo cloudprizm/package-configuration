@@ -6,7 +6,7 @@ export interface HashMap<K = string> {
   [key: string]: string | K
 }
 
-type HashMapWithOptions<V extends string, K = string> = {
+export type HashMapWithOptions<V extends string, K = string> = {
   [key in V]: K
 }
 
@@ -69,18 +69,18 @@ export interface PackageJSON {
   email: string
   version: string
   description: string
-  dependencies: HashMap<HashMap>
-  devDependencies: HashMap<HashMap>
+  dependencies: HashMap // per package spec there should be HashMap<HashMap> 
+  devDependencies: HashMap
   peerDependencies: HashMap
   optionalDependencies: HashMap
   bundledDependencies: string[]
   keywords: string[]
   homepage: string
-  bugs: Bugs;
+  bugs: Bugs
   license: License
   licenses: Licenses
 
-  author: Author;
+  author: Author
   contributors: Author[]
   maintainers: Author[]
 
