@@ -17,8 +17,7 @@
     "build:declarations": "tsc --build tsconfig.json",
     "build": "concurrently 'yarn build:declarations' 'yarn build:code'",
     "watch": "concurrently 'yarn build:declarations --watch' 'yarn build:code --watch'",
-    "docs": "typedoc --out docs src --sourcefile-url-prefix https://github.com/hungry-consulting/package-configuration/tree/master/src/",
-    "gh-pages": "rm -rf docs && yarn docs && gh-pages -d docs"
+    "docs": "typedoc --out docs ./src/** --mode file --target ES6 --theme minimal"
   },
   "publishConfig": {
     "access": "public"
@@ -55,7 +54,6 @@
   "devDependencies": {
     "typedoc": "^0.13.0",
     "typedoc-plugin-sourcefile-url": "^1.0.3",
-    "gh-pages": "^2.0.1",
     "@babel/cli": "^7.1.2",
     "@babel/core": "^7.1.2",
     "@hungry/babel-preset-cli": "^0.1.1",

@@ -6,4 +6,4 @@ Super simple set of helpers for handling `package.json` in `typescript`.
 yarn add @hungry/package-configuration
 ```
 
-## [Documentation]()
+## [Documentation](https://hungry-consulting.github.io/package-configuration/)
