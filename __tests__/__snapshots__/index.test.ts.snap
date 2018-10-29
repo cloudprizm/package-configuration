@@ -1,5 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`get dependency version from package 1`] = `
+Object {
+  "dep1": "~0.0.1",
+  "dep2": "~0.0.1",
+  "dep3": "~0.0.1",
+}
+`;
+
 exports[`get deps versions 1`] = `
 Object {
   "@babel/cli": "7.1.2",

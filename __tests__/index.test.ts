@@ -3,7 +3,6 @@ jest.mock('fs')
 
 import {
   coerceVersions,
-  getLocalPackageJson,
   getDependencyVersions,
   persistVersionsFromPackage,
   PackageJSON
@@ -33,8 +32,7 @@ const pkgJSON: Partial<PackageJSON> = {
 }
 
 test('get deps versions', () => {
-  // const pkg = getLocalPackageJson('../package.json')
-  const originalVersions = getDependencyVersions(pkgJSON)
+  const originalVersions = getDependencyVersions(pkgJSON as PackageJSON) // need to think about it
   const cdnVersions = coerceVersions(originalVersions)
   expect(cdnVersions).toMatchSnapshot()
 })
@@ -87,38 +85,52 @@ test('save version to file - if there is a problem', () => {
       else fail('should be left')
     })
 })
-import { pipe as pipeP, flip, curry, applyFlipped } from 'fp-ts/lib/function'
-import * as R from 'fp-ts/lib/Record'
-import { option, some } from 'fp-ts/lib/Option'
 
-test('fuck you ramda', () => {
-  // export const getDependencyVersions =
-  //   pipe<PackageJSON, ToDependencies, toDependenciesPairs, ReadonlyArray<Deps>, HashMap>(
-  //     pick(['peerDependencies', 'devDependencies', 'dependencies']),
-  //     toPairs,
-  //     map(([_, deps]) => deps),
-  //     reduce(merge, {})
-  //   )
+const packageVersions: Partial<PackageJSON> = {
+  devDependencies: {
+    "dep1": "~0.0.1"
+  },
+  peerDependencies: {
+    "dep2": "~0.0.1"
+  },
+  dependencies: {
+    "dep3": "~0.0.1"
+  }
+}
 
-  // toPairs R.toArray
-  // fromPairs R.fromFoldable
+test('get dependency version from package', () => {
+  expect(getDependencyVersions(packageVersions)).toMatchSnapshot()
+})
 
-  const pkgJson = pkgJSON
-  // const traverse_ = curry(R.traverseWithKey(option))
-  // traverse_({})((d) => some(1))
+import { some } from 'fp-ts/lib/Option'
+import { HashMap } from '../src/types'
+import { getObjectSemigroup } from 'fp-ts/lib/Semigroup'
 
-  // const traverse_ = R.traverseWithKey(option)
-  // traverse_({ dupa: true }, (a, b) => {
-  //   return some(1)
-  // })
+test('get deps versions - alternative', () => {
+  const getPeerDeps = (pkg: Partial<PackageJSON>) =>
+    some(pkg)
+      .mapNullable((value) => value.peerDependencies)
+      .alt(some({}))
 
-  // const flipped_ = flip(curry<boolean, any, any>(R.traverseWithKey(option)))
-  // flipped_((a, b) => {
-  //   return some(1)
-  // })({ dupa: true })
+  const getDevDeps = (pkg: Partial<PackageJSON>) =>
+    some(pkg)
+      .mapNullable((value) => value.devDependencies)
+      .alt(some({}))
 
-  // const getDepsVersion = pipeP(
-  //   R.filter()
-  //   R.map()
-  // )
+  const getDeps = (pkg: Partial<PackageJSON>) =>
+    some(pkg)
+      .mapNullable((value) => value.dependencies)
+      .alt(some({}))
+
+  const S = getObjectSemigroup<HashMap>()
+  const getDepsVersions = (pkg: Partial<PackageJSON>) =>
+    getDevDeps(pkg).chain(dev =>
+      getPeerDeps(pkg).chain(peer =>
+        getDeps(pkg).chain(deps =>
+          some(S.concat(deps, S.concat(dev, peer)))
+        ))
+    )
+
+  expect(getDepsVersions(packageVersions).toNullable())
+    .toEqual(getDependencyVersions(packageVersions))
 })

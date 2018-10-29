@@ -1,14 +1,18 @@
 import cosmiconfig, { Config as Cosmiconfig, CosmiconfigResult } from 'cosmiconfig'
 import { Overwrite, $Keys } from 'utility-types'
 
-import { HashMap, HashMapWithOptions, PackageJSON } from './types'
-import { defaultTo, fromPairs, reduce, merge, map, toPairs, pipe, pick } from 'ramda'
+import { HashMap, PackageJSON } from './types'
 import { valid, coerce } from 'semver'
-
-import { ask, fromIO, readerTaskEither, tryCatch } from 'fp-ts/lib/ReaderTaskEither'
-import { IO } from 'fp-ts/lib/IO'
 import { promises as fs } from 'fs'
 import { resolve } from 'path'
+
+import { ask, readerTaskEither, tryCatch } from 'fp-ts/lib/ReaderTaskEither'
+
+import { some, option, none } from 'fp-ts/lib/Option'
+import { getFoldableComposition } from 'fp-ts/lib/Foldable2v'
+import { getObjectSemigroup } from 'fp-ts/lib/Semigroup'
+import { array } from 'fp-ts/lib/Array'
+import * as R from 'fp-ts/lib/Record'
 
 export type ExtendableCosmiconfig<K = Cosmiconfig> =
   Overwrite<Exclude<CosmiconfigResult, null>, { config: K }>
@@ -36,37 +40,27 @@ export const getModuleConfig = (module: string, searchFrom: string = '') =>
 export const getLocalPackageJson = (location: string = './package.json'): PackageJSON =>
   require(location)
 
-export type PackageJSONDepsKeys = 'peerDependencies' | 'devDependencies' | 'dependencies'
-export type PackageJSONDeps = Pick<PackageJSON, PackageJSONDepsKeys>
-export type PackageDependency = HashMap
-export type Deps = HashMapWithOptions<PackageJSONDepsKeys, PackageDependency>
-type toDependenciesPairs = ReadonlyArray<[string, PackageDependency]>
-
-export const getDependencyVersions =
-  pipe<PackageJSON, PackageJSONDeps, toDependenciesPairs, PackageDependency[], PackageDependency>(
-    pick(['peerDependencies', 'devDependencies', 'dependencies']),
-    toPairs,
-    map(([_, deps]) => deps),
-    reduce(merge, {})
-  )
-
-type DependencyT = [string, string]
-
-const resolveSemVer = pipe(
-  coerce,
-  defaultTo(''),
-  valid,
-)
+export const getDependencyVersions = (pkg: Partial<PackageJSON>): HashMap => {
+  const S = getObjectSemigroup<HashMap>()
+  const S2 = getFoldableComposition(array, option)
+  return S2.reduce([
+    some(pkg).mapNullable(value => value.peerDependencies),
+    some(pkg).mapNullable(value => value.devDependencies),
+    some(pkg).mapNullable(value => value.dependencies),
+  ], {} as HashMap, S.concat)
+}
 
 /**
  * Converting list of package dependencies to the latest
  */
-export const coerceVersions =
-  pipe<PackageDependency, ReadonlyArray<[string, string]>, DependencyT[], HashMap>(
-    toPairs,
-    map(([dep, version]) => [dep, resolveSemVer(version)] as DependencyT),
-    fromPairs,
-  )
+type Version = string
+const toSemVer = (version: Version) => {
+  const v = coerce(version)
+  return v ? some(valid(v)) : none
+}
+// compact
+export const coerceVersions = (pkgVersions: HashMap<Version>) =>
+  R.compact(R.map(pkgVersions, toSemVer))
 
 interface VersionPersisterConfig {
   destinationPath?: string
@@ -93,16 +87,24 @@ export const resolveConfigPaths =
 
 export const loadPackageFile = () =>
   resolveConfigPaths
-    .chain(d => fromIO(new IO(() => getLocalPackageJson(d.packagePath))))
+    .chain(cfg => tryCatch(
+      () => Promise.resolve(getLocalPackageJson(cfg.packagePath)),
+      (reason) => (reason as Error).message
+    ))
 
 export const saveFile = (content: Content) =>
   ask<Config, IOResult>()
     .chain((config) =>
       tryCatch(() => fs
         // not sure how to make it not optional when chaining
-        .writeFile(config.destinationPath ? config.destinationPath : '', content).then(() => content),
+        .writeFile(
+          config.destinationPath
+            ? config.destinationPath
+            : '', content)
+        .then(() => content),
+
         // not sure why reason is untyped
-               (reason) => (reason as Error).message,
+        (reason) => (reason as Error).message,
       )
     )
 
