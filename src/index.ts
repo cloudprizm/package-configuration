@@ -40,14 +40,15 @@ export const getModuleConfig = (module: string, searchFrom: string = '') =>
 export const getLocalPackageJson = (location: string = './package.json'): PackageJSON =>
   require(location)
 
+const semigroup = getObjectSemigroup<HashMap>()
+const foldable = getFoldableComposition(array, option)
+
 export const getDependencyVersions = (pkg: Partial<PackageJSON>): HashMap => {
-  const S = getObjectSemigroup<HashMap>()
-  const S2 = getFoldableComposition(array, option)
-  return S2.reduce([
+  return foldable.reduce([
     some(pkg).mapNullable(value => value.peerDependencies),
     some(pkg).mapNullable(value => value.devDependencies),
     some(pkg).mapNullable(value => value.dependencies),
-  ], {} as HashMap, S.concat)
+  ], {} as HashMap, semigroup.concat)
 }
 
 /**
@@ -58,7 +59,7 @@ const toSemVer = (version: Version) => {
   const v = coerce(version)
   return v ? some(valid(v)) : none
 }
-// compact
+
 export const coerceVersions = (pkgVersions: HashMap<Version>) =>
   R.compact(R.map(pkgVersions, toSemVer))
 
