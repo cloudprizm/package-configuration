@@ -31,6 +31,10 @@ const pkgJSON: Partial<PackageJSON> = {
   }
 }
 
+beforeEach(() => {
+  jest.resetModules()
+})
+
 test('get deps versions', () => {
   const originalVersions = getDependencyVersions(pkgJSON as PackageJSON) // need to think about it
   const cdnVersions = coerceVersions(originalVersions)
@@ -88,13 +92,13 @@ test('save version to file - if there is a problem', () => {
 
 const packageVersions: Partial<PackageJSON> = {
   devDependencies: {
-    "dep1": "~0.0.1"
+    'dep1': '~0.0.1'
   },
   peerDependencies: {
-    "dep2": "~0.0.1"
+    'dep2': '~0.0.1'
   },
   dependencies: {
-    "dep3": "~0.0.1"
+    'dep3': '~0.0.1'
   }
 }
 
@@ -104,7 +108,8 @@ test('get dependency version from package', () => {
 
 import { some } from 'fp-ts/lib/Option'
 import { HashMap } from '../src/types'
-import { getObjectSemigroup } from 'fp-ts/lib/Semigroup'
+import { getDictionaryMonoid, getArrayMonoid } from 'fp-ts/lib/Monoid'
+import { semigroupSum, getObjectSemigroup, fold } from 'fp-ts/lib/Semigroup'
 
 test('get deps versions - alternative', () => {
   const getPeerDeps = (pkg: Partial<PackageJSON>) =>
@@ -130,7 +135,7 @@ test('get deps versions - alternative', () => {
           some(S.concat(deps, S.concat(dev, peer)))
         ))
     )
-
+  // const todo = fold(getArrayMonoid<HashMap>())([dev, deps, peer])([])
   expect(getDepsVersions(packageVersions).toNullable())
     .toEqual(getDependencyVersions(packageVersions))
 })

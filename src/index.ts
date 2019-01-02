@@ -128,7 +128,5 @@ export {
   Config as PackageConfig,
 } from 'cosmiconfig'
 
-export {
-  PackageJSON,
-  HashMap as DependencyVersions
-} from './types'
+export type DependencyVersions = Record<string, string | undefined>
+export { PackageJSON } from './types'

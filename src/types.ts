@@ -2,9 +2,8 @@
 // a) http://wiki.commonjs.org/wiki/Packages/1.0
 // b) https://docs.npmjs.com/files/package.json 
 
-export interface HashMap<K = string> {
-  [key: string]: string | K
-}
+// TODO drop this type and use Record only
+export type HashMap<K = string> = Record<string, K>
 
 export type HashMapWithOptions<V extends string, K = string> = {
   [key in V]: K
