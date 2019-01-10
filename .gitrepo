@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/hungry-consulting/package-configuration
+	branch = master
+	commit = 488c633e2589a392e6a3cdb869221cada85f2311
+	method = merge
+	cmdver = 0.4.0
+	parent = e7d1a577f52bde95a115c52893c0cd9a7bc51128
