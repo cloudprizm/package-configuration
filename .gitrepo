@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/hungry-consulting/package-configuration
 	branch = master
-	commit = 488c633e2589a392e6a3cdb869221cada85f2311
+	commit = f83a23b41bac11ff45c8ff08abfe482670c1fef2
 	method = merge
 	cmdver = 0.4.0
-	parent = e7d1a577f52bde95a115c52893c0cd9a7bc51128
+	parent = 1d48e55c9895a96066961b394f2353937f7621f5
